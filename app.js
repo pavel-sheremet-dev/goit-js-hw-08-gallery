@@ -136,7 +136,7 @@ function onPrevNextPress(e) {
     setTimeout(() => {
       refs.modalImage.src = nextImage.dataset.source;
       refs.modalImage.alt = nextImage.alt;
-    }, 125);
+    }, 250);
 
     imageAnimation();
 
@@ -149,7 +149,7 @@ function onPrevNextPress(e) {
     setTimeout(() => {
       refs.modalImage.src = prevImage.dataset.source;
       refs.modalImage.alt = prevImage.alt;
-    }, 200);
+    }, 250);
 
     imageAnimation();
 
