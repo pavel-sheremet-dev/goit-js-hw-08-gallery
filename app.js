@@ -10,9 +10,16 @@ const refs = {
   modalContent: document.querySelector('.lightbox__content'),
 };
 
+const CSS_ANIM_DURATION = 100;
+
 let currentLiRef;
 
-// Class toggle functions
+// debounce for Arrows keys listener (lodash library).
+// onPrevNextPress on the 145 line
+
+const debounceNextPrev = _.debounce(onPrevNextPress, CSS_ANIM_DURATION);
+
+// Toggle class functions
 
 const toggleHidden = () => document.body.classList.toggle('is-hidden');
 const toggleNext = () => refs.modalContent.classList.toggle('next');
@@ -20,33 +27,41 @@ const toggleNextNext = () => refs.modalContent.classList.toggle('next-next');
 
 // Scrolling animation
 
-const imageAnimation = () => {
+const imageAnimation = duration => {
   const isNext = refs.modalContent.classList.contains('next');
   if (isNext) {
     toggleNext();
-    setTimeout(toggleNextNext, 250);
+    setTimeout(toggleNextNext, duration * 1.5);
   } else {
-    setTimeout(toggleNext, 250);
+    setTimeout(toggleNext, duration * 1.5);
     toggleNextNext();
   }
 };
 
-const modalFilling = obj => {
-  refs.modalImage.src = obj.dataset.source;
-  refs.modalImage.alt = obj.alt;
+const modalFilling = el => {
+  refs.modalImage.src = el.dataset.source;
+  refs.modalImage.alt = el.alt;
   refs.modal.classList.add('is-open');
   toggleNext();
 };
 
-const modalClear = () => {
+const modalChange = (el, duration) => {
+  setTimeout(() => {
+    refs.modalImage.src = el.dataset.source;
+    refs.modalImage.alt = el.alt;
+  }, duration);
+};
+
+const modalClear = duration => {
   const isNext = refs.modalContent.classList.contains('next');
 
   refs.modal.classList.remove('is-open');
   refs.modalContent.classList.remove(isNext ? 'next' : 'next-next');
+
   setTimeout(() => {
     refs.modalImage.src = '';
     refs.modalImage.alt = '';
-  }, 500);
+  }, duration * 2);
 };
 
 // create and insert markup
@@ -89,7 +104,7 @@ function onGalleryItemClick(e) {
   currentLiRef = targetObj.closest('li');
 
   window.addEventListener('keydown', onEscPress);
-  window.addEventListener('keydown', onPrevNextPress);
+  window.addEventListener('keydown', debounceNextPrev);
 }
 
 // Close modal by close button and overlay click
@@ -108,10 +123,10 @@ function modalClose(e) {
   }
 
   toggleHidden();
-  modalClear();
+  modalClear(CSS_ANIM_DURATION);
 
   window.removeEventListener('keydown', onEscPress);
-  window.removeEventListener('keydown', onPrevNextPress);
+  window.removeEventListener('keydown', debounceNextPrev);
 }
 
 // Close modal by Escape
@@ -119,12 +134,14 @@ function modalClose(e) {
 function onEscPress(e) {
   if (e.code === 'Escape') {
     toggleHidden();
-    modalClear();
+    modalClear(CSS_ANIM_DURATION);
 
     window.removeEventListener('keydown', onEscPress);
     window.removeEventListener('keydown', onPrevNextPress);
   }
 }
+
+// Display next or previous image from the list on the modal window by ArrowRight/ArrowLeft
 
 function onPrevNextPress(e) {
   if (!(e.code === 'ArrowRight' || e.code === 'ArrowLeft')) {
@@ -133,12 +150,9 @@ function onPrevNextPress(e) {
 
   if (e.code === 'ArrowRight' && currentLiRef.nextSibling) {
     const nextImage = currentLiRef.nextSibling.querySelector('.gallery__image');
-    setTimeout(() => {
-      refs.modalImage.src = nextImage.dataset.source;
-      refs.modalImage.alt = nextImage.alt;
-    }, 250);
+    modalChange(nextImage, CSS_ANIM_DURATION);
 
-    imageAnimation();
+    imageAnimation(CSS_ANIM_DURATION);
 
     currentLiRef = currentLiRef.nextSibling;
   }
@@ -146,12 +160,10 @@ function onPrevNextPress(e) {
   if (e.code === 'ArrowLeft' && currentLiRef.previousSibling) {
     const prevImage =
       currentLiRef.previousSibling.querySelector('.gallery__image');
-    setTimeout(() => {
-      refs.modalImage.src = prevImage.dataset.source;
-      refs.modalImage.alt = prevImage.alt;
-    }, 250);
 
-    imageAnimation();
+    modalChange(prevImage, CSS_ANIM_DURATION);
+
+    imageAnimation(CSS_ANIM_DURATION);
 
     currentLiRef = currentLiRef.previousSibling;
   }

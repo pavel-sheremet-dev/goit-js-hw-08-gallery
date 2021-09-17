@@ -1,6 +1,6 @@
 :root {
   --timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  --animation-duration: 250ms;
+  --animation-duration: 100ms;
 }
 
 html {
@@ -99,12 +99,6 @@ body {
   transition: transform var(--animation-duration) var(--timing-function),
     opacity var(--animation-duration) var(--timing-function);
 }
-
-/* .lightbox.is-open .lightbox__content {
-  transform: scale(1);
-} */
-
-/*  */
 
 .lightbox.is-open .next {
   opacity: 1;
