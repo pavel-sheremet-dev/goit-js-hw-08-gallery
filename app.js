@@ -10,7 +10,7 @@ const refs = {
   modalBtn: document.querySelector('button[data-action="close-lightbox"]'),
 };
 
-const CSS_ANIM_DURATION = 100;
+const CSS_ANIM_DURATION = 200;
 
 let currentLiRef;
 
@@ -48,16 +48,16 @@ const imageAnimation = duration => {
   const hasNext = refs.modalContent.classList.contains('next');
   if (hasNext) {
     toggleNext();
-    setTimeout(toggleNextNext, duration * 1.5);
+    setTimeout(toggleNextNext, duration);
   } else {
-    setTimeout(toggleNext, duration * 1.5);
+    setTimeout(toggleNext, duration);
     toggleNextNext();
   }
 };
 
 // Modal changes
 
-const modalFilling = el => {
+const modalFilling = (el, duration) => {
   refs.modalImage.src = el.dataset.source;
   refs.modalImage.alt = el.alt;
   refs.modal.classList.add('is-open');
@@ -68,7 +68,7 @@ const modalChange = (el, duration) => {
   setTimeout(() => {
     refs.modalImage.src = el.dataset.source;
     refs.modalImage.alt = el.alt;
-  }, duration);
+  }, duration * 0.75);
 };
 
 const modalClear = duration => {
@@ -83,11 +83,11 @@ const modalClear = duration => {
   }, duration);
 };
 
-/*  Debounce for Arrows keys listener (lodash library).
+/*  throttle for Arrows keys listener (lodash library).
  *   onPrevNextPress() on the 145 line
  */
 
-const debounceNextPrev = _.debounce(onPrevNextPress, CSS_ANIM_DURATION * 1.5);
+const throttleNextPrev = _.throttle(onPrevNextPress, CSS_ANIM_DURATION * 2);
 
 // Open modal by click on the gallery item
 
@@ -107,7 +107,7 @@ function onGalleryItemClick(e) {
   currentLiRef = targetObj.closest('li');
 
   window.addEventListener('keydown', onEscPress);
-  window.addEventListener('keydown', debounceNextPrev);
+  window.addEventListener('keydown', throttleNextPrev);
 }
 
 // Display next or previous image from the list on the modal window by ArrowRight/ArrowLeft
@@ -156,7 +156,7 @@ function modalClose(e) {
   modalClear(CSS_ANIM_DURATION);
 
   window.removeEventListener('keydown', onEscPress);
-  window.removeEventListener('keydown', debounceNextPrev);
+  window.removeEventListener('keydown', throttleNextPrev);
 }
 
 // Close modal by Escape
@@ -167,6 +167,6 @@ function onEscPress(e) {
     modalClear(CSS_ANIM_DURATION);
 
     window.removeEventListener('keydown', onEscPress);
-    window.removeEventListener('keydown', onPrevNextPress);
+    window.removeEventListener('keydown', throttleNextPrev);
   }
 }
