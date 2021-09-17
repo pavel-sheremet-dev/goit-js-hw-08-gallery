@@ -17,7 +17,7 @@ let currentLiRef;
 // debounce for Arrows keys listener (lodash library).
 // onPrevNextPress on the 145 line
 
-const debounceNextPrev = _.debounce(onPrevNextPress, CSS_ANIM_DURATION);
+const debounceNextPrev = _.debounce(onPrevNextPress, CSS_ANIM_DURATION * 1.5);
 
 // Toggle class functions
 
