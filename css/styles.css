@@ -1,6 +1,6 @@
 :root {
   --timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  --animation-duration: 250ms;
+  --animation-duration: 200ms;
 }
 
 html {
@@ -94,11 +94,25 @@ body {
 }
 
 .lightbox__content {
-  transform: scale(0.95);
-  transition: transform var(--animation-duration) var(--timing-function);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: transform var(--animation-duration) var(--timing-function),
+    opacity var(--animation-duration) var(--timing-function);
 }
 
-.lightbox.is-open .lightbox__content {
+/* .lightbox.is-open .lightbox__content {
+  transform: scale(1);
+} */
+
+/*  */
+
+.lightbox.is-open .next {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.lightbox.is-open .next-next {
+  opacity: 1;
   transform: scale(1);
 }
 
