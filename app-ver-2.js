@@ -10,7 +10,14 @@ const refs = {
   modalBtn: document.querySelector('button[data-action="close-lightbox"]'),
 };
 
-const CSS_ANIM_DURATION = 200;
+const CSS = {
+  NEXT: 'next',
+  NEXT_NEXT: 'next-next',
+  IS_HIDDEN: 'is-hidden',
+  IS_OPEN: 'is-open',
+  LOADED: 'loaded',
+  DURATION: 200,
+};
 
 let currentItem;
 
@@ -38,21 +45,24 @@ refs.gallery.insertAdjacentHTML('beforeend', galleryMarkup);
 
 // Toggle class functions
 
-const toggleHidden = () => document.body.classList.toggle('is-hidden');
-const toggleNext = () => refs.modalContent.classList.toggle('next');
-const toggleNextNext = () => refs.modalContent.classList.toggle('next-next');
+const toggleClass = (el, toggledCLass) => {
+  el.classList.toggle(toggledCLass);
+};
 
-// Scrolling animation
+const toggleNext = () => refs.modalContent.classList.toggle(CSS.NEXT);
+const toggleLoaded = () => refs.modalImage.classList.toggle(CSS.LOADED);
 
 const imageAnimation = duration => {
-  const hasNext = refs.modalContent.classList.contains('next');
-  if (hasNext) {
-    toggleNext();
-    setTimeout(toggleNextNext, duration);
-  } else {
-    setTimeout(toggleNext, duration);
-    toggleNextNext();
-  }
+  toggleNext();
+  setTimeout(toggleNext, duration);
+  toggleLoaded();
+  refs.modalImage.addEventListener(
+    'load',
+    () => {
+      setTimeout(toggleLoaded, duration);
+    },
+    { once: true },
+  );
 };
 
 // Modal changes
@@ -60,8 +70,16 @@ const imageAnimation = duration => {
 const modalFilling = el => {
   refs.modalImage.src = el.dataset.source;
   refs.modalImage.alt = el.alt;
-  refs.modal.classList.add('is-open');
+  refs.modalImage.addEventListener(
+    'load',
+    () => {
+      toggleClass(refs.modal, CSS.IS_OPEN);
+    },
+    { once: true },
+  );
+
   toggleNext();
+  toggleLoaded();
 };
 
 const modalChange = (item, duration) => {
@@ -72,10 +90,9 @@ const modalChange = (item, duration) => {
 };
 
 const modalClear = duration => {
-  const hasNext = refs.modalContent.classList.contains('next');
-
-  refs.modal.classList.remove('is-open');
-  refs.modalContent.classList.remove(hasNext ? 'next' : 'next-next');
+  toggleLoaded();
+  toggleClass(refs.modal, CSS.IS_OPEN);
+  toggleClass(refs.modalContent, CSS.NEXT);
 
   setTimeout(() => {
     refs.modalImage.src = '';
@@ -103,9 +120,9 @@ const getPrevItem = currentItem => {
 };
 
 /*  throttle for Arrows keys listener (lodash library). 
-onPrevNextPress after 130 line */
+onKeysPress after 130 line */
 
-const throttleNextPrev = _.throttle(onPrevNextPress, CSS_ANIM_DURATION * 2);
+const throttleOnPressKey = _.throttle(onKeysPress, CSS.DURATION * 2);
 
 // Open modal by click on the gallery item
 
@@ -119,25 +136,32 @@ function onGalleryItemClick(e) {
   }
 
   modalFilling(targetObj);
-  toggleHidden();
+  toggleClass(document.body, CSS.IS_HIDDEN);
   currentItem = getCurrentItem(targetObj.dataset.source);
 
-  window.addEventListener('keydown', onEscPress);
-  window.addEventListener('keydown', throttleNextPrev);
+  window.addEventListener('keydown', throttleOnPressKey);
 }
 
 // Display next or previous image from the list on the modal window by ArrowRight/ArrowLeft
 
-function onPrevNextPress(e) {
-  if (!(e.code === 'ArrowRight' || e.code === 'ArrowLeft')) {
+function onKeysPress(e) {
+  console.log('клик 1');
+  if (!['ArrowRight', 'ArrowLeft', 'Escape'].includes(e.code)) {
     return;
+  }
+  console.log('клик 2');
+  if (e.code === 'Escape') {
+    toggleClass(document.body, CSS.IS_HIDDEN);
+    modalClear(CSS.DURATION);
+
+    window.removeEventListener('keydown', throttleOnPressKey);
   }
 
   if (e.code === 'ArrowRight') {
     const nextItem = getNextItem(currentItem);
 
-    modalChange(nextItem, CSS_ANIM_DURATION);
-    imageAnimation(CSS_ANIM_DURATION);
+    modalChange(nextItem, CSS.DURATION);
+    imageAnimation(CSS.DURATION);
 
     currentItem = nextItem;
   }
@@ -145,8 +169,8 @@ function onPrevNextPress(e) {
   if (e.code === 'ArrowLeft') {
     const prevItem = getPrevItem(currentItem);
 
-    modalChange(prevItem, CSS_ANIM_DURATION);
-    imageAnimation(CSS_ANIM_DURATION);
+    modalChange(prevItem, CSS.DURATION);
+    imageAnimation(CSS.DURATION);
 
     currentItem = prevItem;
   }
@@ -167,21 +191,8 @@ function modalClose(e) {
     return;
   }
 
-  toggleHidden();
-  modalClear(CSS_ANIM_DURATION);
+  toggleClass(document.body, CSS.IS_HIDDEN);
+  modalClear(CSS.DURATION);
 
-  window.removeEventListener('keydown', onEscPress);
-  window.removeEventListener('keydown', throttleNextPrev);
-}
-
-// Close modal by Escape
-
-function onEscPress(e) {
-  if (e.code === 'Escape') {
-    toggleHidden();
-    modalClear(CSS_ANIM_DURATION);
-
-    window.removeEventListener('keydown', onEscPress);
-    window.removeEventListener('keydown', throttleNextPrev);
-  }
+  window.removeEventListener('keydown', throttleOnPressKey);
 }
