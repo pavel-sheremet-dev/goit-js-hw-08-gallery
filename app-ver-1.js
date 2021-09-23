@@ -47,11 +47,29 @@ const toggleNextNext = () => refs.modalContent.classList.toggle('next-next');
 const imageAnimation = duration => {
   const hasNext = refs.modalContent.classList.contains('next');
   if (hasNext) {
-    toggleNext();
-    setTimeout(toggleNextNext, duration);
+    refs.modalImage.addEventListener(
+      'load',
+      () => {
+        console.log('картинка загрузилась');
+        toggleNext();
+        setTimeout(toggleNextNext, duration);
+      },
+      { once: true },
+    );
+    // toggleNext();
+    // setTimeout(toggleNextNext, duration);
   } else {
-    setTimeout(toggleNext, duration);
-    toggleNextNext();
+    refs.modalImage.addEventListener(
+      'load',
+      () => {
+        console.log('картинка загрузилась');
+        setTimeout(toggleNext, duration);
+        toggleNextNext();
+      },
+      { once: true },
+    );
+    // setTimeout(toggleNext, duration);
+    // toggleNextNext();
   }
 };
 

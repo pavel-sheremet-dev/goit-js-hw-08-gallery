@@ -12,7 +12,6 @@ const refs = {
 
 const CSS = {
   NEXT: 'next',
-  NEXT_NEXT: 'next-next',
   IS_HIDDEN: 'is-hidden',
   IS_OPEN: 'is-open',
   LOADED: 'loaded',
@@ -92,7 +91,7 @@ const modalChange = (item, duration) => {
 const modalClear = duration => {
   toggleLoaded();
   toggleClass(refs.modal, CSS.IS_OPEN);
-  toggleClass(refs.modalContent, CSS.NEXT);
+  toggleNext();
 
   setTimeout(() => {
     refs.modalImage.src = '';
@@ -145,11 +144,9 @@ function onGalleryItemClick(e) {
 // Display next or previous image from the list on the modal window by ArrowRight/ArrowLeft
 
 function onKeysPress(e) {
-  console.log('клик 1');
   if (!['ArrowRight', 'ArrowLeft', 'Escape'].includes(e.code)) {
     return;
   }
-  console.log('клик 2');
   if (e.code === 'Escape') {
     toggleClass(document.body, CSS.IS_HIDDEN);
     modalClear(CSS.DURATION);
